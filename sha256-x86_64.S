@@ -54,8 +54,15 @@
 
 .text	
 
+.if __APPLE__ != 0
+.globl  _sha256_block_data_order
+.align  4
+_sha256_block_data_order:
+L_sha256_block_data_order_begin:
+.else
 .globl	sha256_block_data_order
 .type	sha256_block_data_order,@function
+.endif
 .align	16
 sha256_block_data_order:
 	pushq	%rbx
@@ -1810,9 +1817,13 @@ sha256_block_data_order:
 	leaq	48(%rsi),%rsp
 .Lepilogue:
 	.byte	0xf3,0xc3
-.size	sha256_block_data_order,.-sha256_block_data_order
+.if __APPLE__ != 0
+.align  6,0x90
+.else
 .align	64
+.size	sha256_block_data_order,.-sha256_block_data_order
 .type	K256,@object
+.endif
 K256:
 .long	0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5
 .long	0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5
