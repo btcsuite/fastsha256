@@ -1,0 +1,12 @@
+LIB= libfastsha256.dylib
+OBJ= obj
+SRCS=sha256.c sha256-x86_64.S
+HDRS= sha256.h
+
+CFLAGS+= -Wall -Werror -O3
+CFLAGS+= -g -dynamiclib
+#CFLAGS+= -I${.CURDIR}
+
+all:
+	mkdir -p $(OBJ)
+	$(CC) $(CFLAGS) $(SRCS) -o $(OBJ)/$(LIB)
