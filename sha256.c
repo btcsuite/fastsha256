@@ -181,6 +181,12 @@ openssl_sha256(void *message, size_t len, void *hash)
 	_sha256_final(hash, &c);
 }
 
+#define SHA_NOASM
+#if defined(__OpenBSD__) && defined(__amd64__) || \
+	defined(__APPLE__) && defined(__amd64__)
+#undef SHA_NOASM
+#endif
+
 #ifdef SHA_NOASM
 static const unsigned int K256[64] = {
 	0x428a2f98UL,0x71374491UL,0xb5c0fbcfUL,0xe9b5dba5UL,
