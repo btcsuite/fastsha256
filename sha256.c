@@ -54,8 +54,9 @@
 
 static char *version __attribute__((__used__)) = "Copyright (c) 1998-2011 "
 	"The OpenSSL Project.  All rights reserved.";
-static char *acknowledgment __attribute__((__used__)) = "This product "
-	"includes software developed by the OpenSSL Project This product includes software developed by the OpenSSL Project";
+static char *acknowledgment __attribute__((__used__)) = "This product includes "
+	"software developed by the OpenSSL Project for use in the OpenSSL "
+	"Toolkit (http://www.openssl.org/)";
 
 #include <string.h>
 #include "sha256.h"
