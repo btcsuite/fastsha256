@@ -133,13 +133,6 @@ _sha256_update(_sha256_ctx *c, const void *data_, size_t len)
 	return 1;
 }
 
-void
-SHA256_Transform(_sha256_ctx *c, const unsigned char *data)
-{
-	sha256_block_data_order(c, data, 1);
-}
-
-
 int
 _sha256_final(void *m, _sha256_ctx *c)
 {
@@ -168,7 +161,7 @@ _sha256_final(void *m, _sha256_ctx *c)
 	unsigned long ll;
 	unsigned int  nn;
 	for (nn = 0; nn < SHA256_DIGEST_LENGTH / 4; nn++) {
-		ll=(c)->h[nn];
+		ll=c->h[nn];
 		HOST_l2c(ll,md);
 	}
 
