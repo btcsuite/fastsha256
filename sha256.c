@@ -183,7 +183,8 @@ openssl_sha256(void *message, size_t len, void *hash)
 
 #define SHA_NOASM
 #if defined(__OpenBSD__) && defined(__amd64__) || \
-	defined(__APPLE__) && defined(__amd64__)
+	defined(__APPLE__) && defined(__amd64__) || \
+	defined(__linux__) && defined(__amd64__)
 #undef SHA_NOASM
 #endif
 
