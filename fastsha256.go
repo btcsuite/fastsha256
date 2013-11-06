@@ -19,7 +19,6 @@ package fastsha256
 // #include <sys/types.h>
 // #include "sha256.h"
 // #cgo CFLAGS: -O3 -static
-// #cgo LDFLAGS: -Lobj -lfastsha256
 import "C"
 import (
 	"hash"

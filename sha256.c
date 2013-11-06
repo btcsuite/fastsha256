@@ -181,7 +181,7 @@ openssl_sha256(void *message, size_t len, void *hash)
 	_sha256_final(hash, &c);
 }
 
-#ifndef SHA256_ASM
+#ifdef SHA_NOASM
 static const unsigned int K256[64] = {
 	0x428a2f98UL,0x71374491UL,0xb5c0fbcfUL,0xe9b5dba5UL,
 	0x3956c25bUL,0x59f111f1UL,0x923f82a4UL,0xab1c5ed5UL,

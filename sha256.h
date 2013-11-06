@@ -64,7 +64,7 @@ typedef struct _sha256_state_st
 	unsigned int num,md_len;
 } _sha256_ctx;
 
-extern void sha256_block_data_order(_sha256_ctx *, const void *, size_t);
+void sha256_block_data_order(_sha256_ctx *, const void *, size_t);
 void openssl_sha256(void *, size_t, void *);
 
 void _sha256_init(_sha256_ctx *);
