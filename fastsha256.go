@@ -67,7 +67,10 @@ func (d0 *digest) Sum(in []byte) []byte {
 	return append(in, ret[:]...)
 }
 
-func (d *digest) Write(in []byte) (nn int, err error) {
+func (d *digest) Write(in []byte) (int, error) {
+	if len(in) == 0 {
+		return 0, nil
+	}
 	C._sha256_update(&d.ctx, unsafe.Pointer(&in[0]), C.size_t(len(in)))
 	return len(in), nil
 }
