@@ -156,7 +156,7 @@ func TestDoubleSha256(t *testing.T) {
 	var b []byte
 	for i := 0; i < 20000; i++ {
 		b = append(b, byte(i%256))
-		_ = DoubleSha256(b)
+		DoubleSha256(b)
 	}
 }
 
