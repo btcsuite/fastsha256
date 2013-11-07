@@ -105,8 +105,41 @@ func TestSHA256AppendAndSum(t *testing.T) {
 
 	got := fmt.Sprintf("%0x", digest)
 	if got != expected {
-		t.Errorf("invalid digest %s %x", expected, got)
+		t.Errorf("invalid digest %x %x", expected, got)
 		return
+	}
+}
+
+func TestSHA256Rolling(t *testing.T) {
+	var b []byte
+	for i := 0; i < 20000; i++ {
+		b = append(b, byte(i%256))
+
+		d := New()
+		d.Write(b)
+		digest := d.Sum(nil)
+
+		digest2 := sha256.Sum256(b)
+
+		if string(digest) != string(digest2[:]) {
+			t.Errorf("invalid digest %x %x", digest, digest2)
+			return
+		}
+	}
+}
+
+func TestSHA256RollingDirect(t *testing.T) {
+	var b []byte
+	for i := 0; i < 20000; i++ {
+		b = append(b, byte(i%256))
+
+		digest := Sum256(b)
+		digest2 := sha256.Sum256(b)
+
+		if string(digest[:]) != string(digest2[:]) {
+			t.Errorf("invalid digest %x %x", digest, digest2)
+			return
+		}
 	}
 }
 
