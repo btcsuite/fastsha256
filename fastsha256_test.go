@@ -143,6 +143,28 @@ func TestSHA256RollingDirect(t *testing.T) {
 	}
 }
 
+func DoubleSha256(b []byte) []byte {
+	hasher := New()
+	hasher.Write(b)
+	sum := hasher.Sum(nil)
+	hasher.Reset()
+	hasher.Write(sum)
+	return hasher.Sum(nil)
+}
+
+func TestDoubleSha256(t *testing.T) {
+	var b []byte
+	for i := 0; i < 20000; i++ {
+		b = append(b, byte(i%256))
+		_ = DoubleSha256(b)
+	}
+}
+
+func TestEmpty(t *testing.T) {
+	var b []byte
+	DoubleSha256(b)
+}
+
 var t = strings.Repeat("a", 2049)
 
 func BenchmarkSha256(b *testing.B) {
