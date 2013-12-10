@@ -8,10 +8,12 @@
 
 // SHA256 block routine. See sha256block.go for Go equivalent.
 //
-// Message schedule:
+// The algorithm is detailed in FIPS 180-4:
 //
-// Wt = Mt for 0 < t < 15
-// Wt = SIGMA1(Wt-2) + SIGMA0(Wt-15) + Wt-16 for 16 < t < 63
+//  http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf
+//
+// Wt = Mt; for 0 <= t <= 15
+// Wt = SIGMA1(Wt-2) + SIGMA0(Wt-15) + Wt-16; for 16 <= t <= 63
 //
 // a = H0
 // b = H1
@@ -44,80 +46,13 @@
 // H6 = g + H6
 // H7 = h + H7
 
-// Calculate T1 in AX - uses AX, CX and DX registers.
-// h is also used as an accumulator. Wt has already been added to h.
-//   T1 = h + BIGSIGMA1(e) + Ch(e, f, g) + Kt + Wt
-//     BIGSIGMA1(x) = ROTR(6,x) XOR ROTR(11,x) XOR ROTR(25,x)
-//     CH(x, y, z) = (x AND y) XOR (NOT x AND z)
-#define SHA256T1(const, e, f, g, h) \
-	MOVL	e, AX; \
-	ADDL	$const, h; \
-	MOVL	e, CX; \
-	RORL	$6, AX; \
-	MOVL	e, DX; \
-	RORL	$11, CX; \
-	XORL	CX, AX; \
-	MOVL	e, CX; \
-	RORL	$25, DX; \
-	ANDL	f, CX; \
-	XORL	AX, DX; \
-	MOVL	e, AX; \
-	NOTL	AX; \
-	ADDL	DX, h; \
-	ANDL	g, AX; \
-	XORL	CX, AX; \
-	ADDL	h, AX
-
-// Calculate T2 in BX - uses DI, BX, CX and DX registers.
-//   T2 = BIGSIGMA0(a) + Maj(a, b, c)
-//     BIGSIGMA0(x) = ROTR(2,x) XOR ROTR(13,x) XOR ROTR(22,x)
-//     MAJ(x, y, z) = (x AND y) XOR (x AND z) XOR (y AND z)
-#define SHA256T2(a, b, c) \
-	MOVL	a, DI; \
-	MOVL	c, BX; \
-	RORL	$2, DI; \
-	MOVL	a, DX; \
-	ANDL	b, BX; \
-	RORL	$13, DX; \
-	MOVL	a, CX; \
-	ANDL	c, CX; \
-	XORL	DX, DI; \
-	XORL	CX, BX; \
-	MOVL	a, DX; \
-	MOVL	b, CX; \
-	RORL	$22, DX; \
-	ANDL	a, CX; \
-	XORL	CX, BX; \
-	XORL	DX, DI; \
-	ADDL	DI, BX
-
-// Calculate T1 and T2, then rotate.
-#define SHA256ROUND0(index, const, a, b, c, d, e, f, g, h) \
-	MSGSCHEDULE0(index); \
-	ADDL	AX, h; \
-	SHA256T1(const, e, f, g, h); \
-	SHA256T2(a, b, c); \
-	MOVL	BX, h; \
-	ADDL	AX, d; \
-	ADDL	AX, h
-
-// Calculate T1 and T2, then rotate.
-#define SHA256ROUND1(index, const, a, b, c, d, e, f, g, h) \
-	MSGSCHEDULE1(index); \
-	ADDL	AX, h; \
-	SHA256T1(const, e, f, g, h); \
-	SHA256T2(a, b, c); \
-	MOVL	BX, h; \
-	ADDL	AX, d; \
-	ADDL	AX, h
-
-// Wt = Mt for 0 < t < 15
+// Wt = Mt; for 0 <= t <= 15
 #define MSGSCHEDULE0(index) \
 	MOVL	(index*4)(SI), AX; \
 	BSWAPL	AX; \
 	MOVL	AX, (index*4)(BP)
 
-// Wt = SIGMA1(Wt-2) + Wt-7 + SIGMA0(Wt-15) + Wt-16 for 16 < t < 63
+// Wt = SIGMA1(Wt-2) + Wt-7 + SIGMA0(Wt-15) + Wt-16; for 16 <= t <= 63
 //   SIGMA0(x) = ROTR(7,x) XOR ROTR(18,x) XOR SHR(3,x)
 //   SIGMA1(x) = ROTR(17,x) XOR ROTR(19,x) XOR SHR(10,x)
 #define MSGSCHEDULE1(index) \
@@ -142,14 +77,79 @@
 	ADDL	BX, AX; \
 	MOVL	AX, ((index)*4)(BP)
 
-TEXT ·block(SB),NOSPLIT,$8
-	MOVQ	p_base+16(FP), SI
-	MOVQ	p_len+24(FP), DX
+// Calculate T1 in AX - uses AX, CX and DX registers.
+// h is also used as an accumulator. Wt is passed in AX.
+//   T1 = h + BIGSIGMA1(e) + Ch(e, f, g) + Kt + Wt
+//     BIGSIGMA1(x) = ROTR(6,x) XOR ROTR(11,x) XOR ROTR(25,x)
+//     Ch(x, y, z) = (x AND y) XOR (NOT x AND z)
+#define SHA256T1(const, e, f, g, h) \
+	ADDL	AX, h; \
+	MOVL	e, AX; \
+	ADDL	$const, h; \
+	MOVL	e, CX; \
+	RORL	$6, AX; \
+	MOVL	e, DX; \
+	RORL	$11, CX; \
+	XORL	CX, AX; \
+	MOVL	e, CX; \
+	RORL	$25, DX; \
+	ANDL	f, CX; \
+	XORL	AX, DX; \
+	MOVL	e, AX; \
+	NOTL	AX; \
+	ADDL	DX, h; \
+	ANDL	g, AX; \
+	XORL	CX, AX; \
+	ADDL	h, AX
+
+// Calculate T2 in BX - uses BX, CX, DX and DI registers.
+//   T2 = BIGSIGMA0(a) + Maj(a, b, c)
+//     BIGSIGMA0(x) = ROTR(2,x) XOR ROTR(13,x) XOR ROTR(22,x)
+//     Maj(x, y, z) = (x AND y) XOR (x AND z) XOR (y AND z)
+#define SHA256T2(a, b, c) \
+	MOVL	a, DI; \
+	MOVL	c, BX; \
+	RORL	$2, DI; \
+	MOVL	a, DX; \
+	ANDL	b, BX; \
+	RORL	$13, DX; \
+	MOVL	a, CX; \
+	ANDL	c, CX; \
+	XORL	DX, DI; \
+	XORL	CX, BX; \
+	MOVL	a, DX; \
+	MOVL	b, CX; \
+	RORL	$22, DX; \
+	ANDL	a, CX; \
+	XORL	CX, BX; \
+	XORL	DX, DI; \
+	ADDL	DI, BX
+
+// Calculate T1 and T2, then e = d + T1 and a = T1 + T2.
+// The values for e and a are stored in d and h, ready for rotation.
+#define SHA256ROUND(index, const, a, b, c, d, e, f, g, h) \
+	SHA256T1(const, e, f, g, h); \
+	SHA256T2(a, b, c); \
+	MOVL	BX, h; \
+	ADDL	AX, d; \
+	ADDL	AX, h
+
+#define SHA256ROUND0(index, const, a, b, c, d, e, f, g, h) \
+	MSGSCHEDULE0(index); \
+	SHA256ROUND(index, const, a, b, c, d, e, f, g, h)
+
+#define SHA256ROUND1(index, const, a, b, c, d, e, f, g, h) \
+	MSGSCHEDULE1(index); \
+	SHA256ROUND(index, const, a, b, c, d, e, f, g, h)
+
+TEXT ·block(SB),0,$264-24
+	MOVQ	p_base+8(FP), SI
+	MOVQ	p_len+16(FP), DX
 	SHRQ	$6, DX
 	SHLQ	$6, DX
 
 	LEAQ	(SI)(DX*1), DI
-	MOVQ	DI, 0(SP)
+	MOVQ	DI, 256(SP)
 	CMPQ	SI, DI
 	JEQ	end
 
@@ -164,7 +164,7 @@ TEXT ·block(SB),NOSPLIT,$8
 	MOVL	(7*4)(BP), R15		// h = H7
 
 loop:
-	MOVQ	schedule+8(FP),	BP
+	MOVQ	SP, BP			// message schedule
 
 	SHA256ROUND0(0, 0x428a2f98, R8, R9, R10, R11, R12, R13, R14, R15)
 	SHA256ROUND0(1, 0x71374491, R15, R8, R9, R10, R11, R12, R13, R14)
@@ -251,7 +251,7 @@ loop:
 	MOVL	R15, (7*4)(BP)
 
 	ADDQ	$64, SI
-	CMPQ	SI, 0(SP)
+	CMPQ	SI, 256(SP)
 	JB	loop
 
 end:

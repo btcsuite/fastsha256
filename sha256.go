@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package sha256 implements the SHA224 and SHA256 hash algorithms as defined
-// in FIPS 180-2.
+// in FIPS 180-4.
 package fastsha256
 
 import (
@@ -45,16 +45,9 @@ const (
 	init7_224 = 0xBEFA4FA4
 )
 
-// schedule represents the SHA256 message schedule.
-type schedule struct {
-	w [64]uint32
-}
-
-// New returns a new hash.Hash computing the SHA256 checksum.
 // digest represents the partial evaluation of a checksum.
 type digest struct {
 	h     [8]uint32
-	s     schedule
 	x     [chunk]byte
 	nx    int
 	len   uint64
@@ -85,6 +78,7 @@ func (d *digest) Reset() {
 	d.len = 0
 }
 
+// New returns a new hash.Hash computing the SHA256 checksum.
 func New() hash.Hash {
 	d := new(digest)
 	d.Reset()
@@ -121,14 +115,14 @@ func (d *digest) Write(p []byte) (nn int, err error) {
 		}
 		d.nx += n
 		if d.nx == chunk {
-			block(d, &d.s, d.x[0:])
+			block(d, d.x[0:])
 			d.nx = 0
 		}
 		p = p[n:]
 	}
 	if len(p) >= chunk {
 		n := len(p) &^ (chunk - 1)
-		block(d, &d.s, p[:n])
+		block(d, p[:n])
 		p = p[n:]
 	}
 	if len(p) > 0 {

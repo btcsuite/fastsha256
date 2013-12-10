@@ -8,4 +8,4 @@ package fastsha256
 
 //go:noescape
 
-func block(dig *digest, s *schedule, p []byte)
+func block(dig *digest, p []byte)
