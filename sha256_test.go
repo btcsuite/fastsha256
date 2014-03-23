@@ -132,6 +132,50 @@ func TestGolden(t *testing.T) {
 	}
 }
 
+func TestMidState(t *testing.T) {
+	tests := []sha256Test{
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", ""},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "a"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "ab"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "abc"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "abcd"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "abcde"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "abcdef"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "abcdefg"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "abcdefgh"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "abcdefghi"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "abcdefghij"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "Discard medicine more than two years old."},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "He who has a shady past knows that nice guys finish last."},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "I wouldn't marry him with a ten foot pole."},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "Free! Free!/A trip/to Mars/for 900/empty jars/Burma Shave"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "The days of the digital watch are numbered.  -Tom Stoppard"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "Nepal premier won't resign."},
+		{"8ee9e4eafd25c794d91d3c27a903ab349b9abbf463b665031f830879b279fc64", "For every action there is an equal and opposite government program."},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "His money is twice tainted: 'taint yours and 'taint mine."},
+		{"70808347da63934bd55fe167fb933295d5a8cfd7b9775ed20f4f8c8165a3c4ac", "There is no reason for any individual to have a computer in their home. -Ken Olsen, 1977"},
+		{"c0b5fdab3680a85a1ed902a4c64b334bb9245f3766759167bbbd63bac6fd2d40", "It's a tiny change to the code and not completely disgusting. - Bob Manchek"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "size:  a.out:  bad magic"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "The major problem is with sendmail.  -Mark Horton"},
+		{"0cec7aa455df798587963f9f24225e2b8fa2af19e27e959eaa2c4cfe2589899e", "Give me a rock, paper and scissors and I will move the world.  CCFestoon"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "If the enemy is within range, then so are you."},
+		{"89b7cf839f8717c70523b064e6515db1e7845dc6aefcb346d4052ab124821c8a", "It's well we cannot hear the screams/That we create in others' dreams."},
+		{"57bc2c73b864f27946a25389b4dbb2fd607fd14349aafaaeea6a9633b28a36f5", "You remind me of a TV show, but that's all right: I watch it anyway."},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "C is as portable as Stonehedge!!"},
+		{"f11d7deea50ae03424ec5e26b045c13183ab81026a73e87fd0a220f1b0738bc1", "Even if I could be Shakespeare, I think I should still choose to be Faraday. - A. Huxley"},
+		{"9314c87a870e0b6ff1450fa456b2610087b5c794fcea56c29e67bc17b185d19a", "The fugacity of a constituent in a mixture of gases at a given temperature is proportional to its mole fraction.  Lewis-Randall Rule"},
+		{"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", "How can you write a big system without C++?  -Paul Glick"},
+	}
+
+	for _, test := range tests {
+		s := fmt.Sprintf("%x", MidState256([]byte(test.in)))
+		if s != test.out {
+			t.Errorf("Sum256 function: sha256(%s) = %s want %s", test.in, s, test.out)
+			continue
+		}
+	}
+}
+
 var bench = New()
 var buf = make([]byte, 8192)
 

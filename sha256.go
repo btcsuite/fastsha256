@@ -197,3 +197,28 @@ func Sum224(data []byte) (sum224 [Size224]byte) {
 	copy(sum224[:], sum[:Size224])
 	return
 }
+
+// MidState256 returns the internal hashing state after hashing the first chunk
+// (BlockSize) of the data.  This implemenation does not provide any mechanism
+// to initialize the internal hashing state, so this information can't be used
+// to skip hashing the first chunk on subsequent calls, but it is exposed so
+// sophisticated callers can make use of it.
+func MidState256(data []byte) [Size]byte {
+	if len(data) > BlockSize {
+		data = data[:BlockSize]
+	}
+
+	var d digest
+	d.Reset()
+	d.Write(data)
+
+	var midState [Size]byte
+	for i, s := range d.h {
+		midState[i*4] = byte(s >> 24)
+		midState[i*4+1] = byte(s >> 16)
+		midState[i*4+2] = byte(s >> 8)
+		midState[i*4+3] = byte(s)
+	}
+
+	return midState
+}
