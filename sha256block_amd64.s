@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// +build !appengine
+
 //#include "../../../cmd/ld/textflag.h"
 // just use the #define for now since this isn't in the main repo yet.
 #define NOSPLIT 4
